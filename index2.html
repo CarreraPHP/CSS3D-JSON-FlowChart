@@ -45,6 +45,9 @@ var chart = [{
     }, {
         name: 'Always',
         charts: 'ch0001-ch0002-ch0004'
+    }, {
+        name: 'rare',
+        charts: 'ch0001-ch0002-ch0007'
     }]
 }, {
     id: 'ch0001-ch0002-ch0003',
@@ -54,6 +57,10 @@ var chart = [{
         name: 'Always',
         impact: -1,
         charts: 'ch0001-ch0002-ch0003-ch0005'
+    }, {
+        name: 'Finish',
+        impact: -1,
+        charts: 'ch0001-ch0002-ch0003-ch0008'
     }]
 }, {
     id: 'ch0001-ch0002-ch0004',
@@ -78,6 +85,22 @@ var chart = [{
     description: '',
     options: [{
         name: 'Finish',
+        charts: ''
+    }]
+}, {
+    id: 'ch0001-ch0002-ch0007',  
+    name: 'Check dynamic behaviour of the flow chart',
+    description: '',
+    options: [{
+        name: 'Working',
+        charts: ''
+    }]
+}, {
+	id: 'ch0001-ch0002-ch0003-ch0008',
+	name: 'Check dynamic behaviour of the flow chart -2',
+    description: '',
+    options: [{
+        name: 'Working',
         charts: ''
     }]
 }];
@@ -173,7 +196,20 @@ var chart = [{
 				max_y = (max_cnt * 400) / 2;
 				console.log(max_cnt, max_y);
 
-				var cnObjects = nObjects, cardStart = true, _x = 0, _y = 0, _z = 0, nObjIndex = 0;
+				var cnObjects = [], cardStart = true, _x = 0, _y = 0, _z = 0, nObjIndex = 0;
+
+				//reset object for handling the shuffled arrangements of grid array.
+				objects = [];
+
+				for(var _ci in nObjects){
+					cnObjects[_ci] = [];
+					if(nObjects[_ci].length > 0){
+						for(var _cj in nObjects[_ci]){
+							cnObjects[_ci][_cj] = nObjects[_ci][_cj];
+							objects.push(nObjects[_ci][_cj]);
+						}	
+					}
+				}
 
 				while(cnObjects.length !== 0){
 					var cur = cnObjects.shift();
@@ -187,7 +223,7 @@ var chart = [{
 							cardStart = false;
 						}else{
 							var parentObj = false, 
-								parentObjArr = nObjects[nObjIndex],
+								parentObjArr = nObjects[nObjIndex-1],
 								elem = cur[curIndex].element,
 								elemId = elem.id,
 								elemIdArr = elemId.split('-');
@@ -197,8 +233,30 @@ var chart = [{
 							for (var _nox in parentObjArr){
 								if(parentObjArr[_nox].element.id == parenElemId){
 									parentObj = parentObjArr[_nox];
+// 									console.log("'see if its fine ... ", nObjects, nObjIndex, parentObj, parentObjArr, parenElemId, elemId, '||', _nox, parentObjArr[_nox].element.id);
+// 									console.log("'see if its fine ... ", parentObj, parentObjArr, parenElemId, '||', parentObjArr[_nox].element.id);
 								}
 							}
+							
+							var _y_diff = 500 * (max_cnt/2), _y_incr = 0;
+							if(cur.length > 1){
+								var _y_init = 0;
+								if(cur.length % 2 == 0){
+									_y_init = 1;
+								}else{
+									_y_init = 0;
+								}
+								_y_incr = (curIndex - Math.floor(cur.length/2));
+								if(_y_incr > -1){
+									_y_incr = _y_incr + _y_init;
+								}
+								console.log("curIndex , ", curIndex, (cur.length/2 + 1), (curIndex - (cur.length/2 + 1)), (curIndex - Math.floor(cur.length/2)), _y_incr);
+							}
+
+							cur[curIndex].position.x = parentObj.position.x + 650;
+							cur[curIndex].position.y = parentObj.position.y + (_y_incr * _y_diff);
+							cur[curIndex].position.z = parentObj.position.z;
+							console.log("child - parent position , ", cur[curIndex].position, parentObj.position);
 						}
 						grid.push(cur[curIndex]);
 					}
