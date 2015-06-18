@@ -107,8 +107,13 @@ var chart = [{
 
 			function createOptHolder(){
 				var details = document.createElement( 'div' );
-				details.className = 'details';
+				details.className = 'options';
 				return details;
+			}
+
+			function createOptRow(){
+				var detailRow = document.createElement('div');
+				return detailRow;
 			}
 
 			function createOptSiblings(optHolder, content){
@@ -120,12 +125,12 @@ var chart = [{
 			function createCard(content){
 				var element = document.createElement( 'div' );
 				element.id = content.id;
-				element.className = 'element';
+				element.className = 'card';
 // 				element.style.backgroundColor = 'rgba(0,127,127,' + ( Math.random() * 0.2 + 0.25 ) + ')';
 				element.style.backgroundColor = 'rgba(250,250,250,' + ( Math.random() * 0.08 ) + ')';
 
 				var symbol = document.createElement( 'div' );
-				symbol.className = 'symbol';
+				symbol.className = 'content';
 				symbol.textContent = content.name;
 				element.appendChild( symbol );
 
@@ -133,14 +138,18 @@ var chart = [{
 			}
 
 			function parseChartOptions(opts){
-				var optHolder = createOptHolder();
+				var optHolder = createOptHolder(),
+					optRowArr = [];
 				for(var z in opts){
-// 					console.log("options : ", z, opts[z]);
 					var opt = opts[z];
-					if(opt.charts.length > 0){
-// 						parserChartList(opt.charts);
+
+					if(optRowArr.length == 0){
+						optRowArr.push(createOptRow());
 					}
-					createOptSiblings(optHolder, opt.name);
+					createOptSiblings(optRowArr[0], opt.name);
+					if((z%2 !== 0) || (z == opts.length-1)){
+						optHolder.appendChild(optRowArr.shift());
+					}
 				}
 				return optHolder;
 			}
@@ -217,7 +226,7 @@ var chart = [{
 					for(var curIndex in cur){
 						if(cur.length == 1 && cardStart){
 							_x = 0; _y = 0; _z = 0;
-							cur[curIndex].position.x = 0;
+							cur[curIndex].position.x = -650;
 							cur[curIndex].position.y = 0;
 							cur[curIndex].position.z = 0;
 							cardStart = false;
