@@ -171,7 +171,7 @@ var chart = [{
 			function init() {
 
 				window.camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 30000 );
-				camera.position.z = 3000;
+				camera.position.z = 700;
 
 				scene = new THREE.Scene();
 
@@ -264,49 +264,6 @@ var chart = [{
 					nObjIndex++;
 				}
 
-
-/*
-				// grid
-				for ( var i = objects.length-1, y_level = 0, y_matrix = []; i >= 0; i-- ) {
-					var object = new THREE.Object3D(),
-						j = objects.length-(i+1),
-						sEl = objects[j].element,
-						sElId = sEl.id,
-						idArr = sElId.split('-');
-					
-					y_level = idArr.length;	
-					(y_level in y_matrix) ? y_matrix[y_level]++ : (y_matrix[y_level] = 0);
-				}
-
-				// grid
-				for ( var i = objects.length-1, y_level = 0; i >= 0; i-- ) {
-					var object = new THREE.Object3D(),
-						sEl = objects[j].element,
-						sElId = sEl.id,
-						idArr = sElId.split('-');
-
-					y_level = idArr.length;
-					
-					console.log("object POS ", y_level, y_matrix, object.position.x, object.position.y, object.position.z);
-
-					y_matrix[y_level] = y_matrix[y_level] * -1;
-					var inr = y_matrix[y_level];
-					if(inr != 0){
-						j = objects.length-(i+1);
-						if()j = j-1;
-
-					}
-
-					object.position.x = (j) * 600;
-					object.position.y = (y_level * inr) * 400;
-					object.position.z = 0;
-
-					grid.push( object );
-
-					
-					
-				}
-*/
 				renderer = new THREE.CSS3DRenderer();
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.domElement.style.position = 'absolute';
