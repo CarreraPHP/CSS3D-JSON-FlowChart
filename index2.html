@@ -116,9 +116,12 @@ var chart = [{
 				return detailRow;
 			}
 
-			function createOptSiblings(optHolder, content){
-				var options = document.createElement('div');
-				options.innerHTML = content;
+			function createOptSiblings(optHolder, opt){
+				var options = document.createElement('div'),
+					span = document.createElement('span');
+				span.innerHTML = opt.name;
+				options.appendChild(span);
+				options.rawData = opt;
 				optHolder.appendChild(options);
 			}
 
@@ -146,7 +149,7 @@ var chart = [{
 					if(optRowArr.length == 0){
 						optRowArr.push(createOptRow());
 					}
-					createOptSiblings(optRowArr[0], opt.name);
+					createOptSiblings(optRowArr[0], opt);
 					if((z%2 !== 0) || (z == opts.length-1)){
 						optHolder.appendChild(optRowArr.shift());
 					}
