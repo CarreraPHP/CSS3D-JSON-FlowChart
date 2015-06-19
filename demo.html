@@ -4,16 +4,16 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<title>Flow Chart</title>
-		<link rel="stylesheet" href="index.css" />
+		<link rel="stylesheet" href="css/demo.css" />
 		<style>
-			
+
 		</style>
 	</head>
 	<body>
-		<script src="three.min.js"></script>
-		<script src="tween.min.js"></script>
-		<script src="TrackballControls.js"></script>
-		<script src="CSS3DRenderer.js"></script>
+		<script src="js/three.min.js"></script>
+		<script src="js/tween.min.js"></script>
+		<script src="js/TrackballControls.js"></script>
+		<script src="js/CSS3DRenderer.js"></script>
 
 		<div id="container"></div>
 		<script>
@@ -80,7 +80,7 @@ var chart = [{
         charts: 'ch0001-ch0002-ch0003-ch0005-ch0006'
     }]
 }, {
-    id: 'ch0001-ch0002-ch0003-ch0005-ch0006',  
+    id: 'ch0001-ch0002-ch0003-ch0005-ch0006',
     name: 'Try with different login id\'s and see if for all users getting slow response',
     description: '',
     options: [{
@@ -88,7 +88,7 @@ var chart = [{
         charts: ''
     }]
 }, {
-    id: 'ch0001-ch0002-ch0007',  
+    id: 'ch0001-ch0002-ch0007',
     name: 'Check dynamic behaviour of the flow chart',
     description: '',
     options: [{
@@ -177,7 +177,7 @@ var chart = [{
 			}
 
 			init();
-			
+
 			animate();
 
 			function init() {
@@ -219,13 +219,13 @@ var chart = [{
 						for(var _cj in nObjects[_ci]){
 							cnObjects[_ci][_cj] = nObjects[_ci][_cj];
 							objects.push(nObjects[_ci][_cj]);
-						}	
+						}
 					}
 				}
 
 				while(cnObjects.length !== 0){
 					var cur = cnObjects.shift();
-					
+
 					for(var curIndex in cur){
 						if(cur.length == 1 && cardStart){
 							_x = 0; _y = 0; _z = 0;
@@ -234,7 +234,7 @@ var chart = [{
 							cur[curIndex].position.z = 0;
 							cardStart = false;
 						}else{
-							var parentObj = false, 
+							var parentObj = false,
 								parentObjArr = nObjects[nObjIndex-1],
 								elem = cur[curIndex].element,
 								elemId = elem.id,
@@ -249,7 +249,7 @@ var chart = [{
 // 									console.log("'see if its fine ... ", parentObj, parentObjArr, parenElemId, '||', parentObjArr[_nox].element.id);
 								}
 							}
-							
+
 							var _y_diff = 500 * (max_cnt/2), _y_incr = 0;
 							if(cur.length > 1){
 								var _y_init = 0;

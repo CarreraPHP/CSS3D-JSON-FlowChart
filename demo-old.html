@@ -4,16 +4,16 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<title>Flow Chart</title>
-		<link rel="stylesheet" href="index.css" />
+		<link rel="stylesheet" href="css/demo.css" />
 		<style>
-			
+
 		</style>
 	</head>
 	<body>
-		<script src="three.min.js"></script>
-		<script src="tween.min.js"></script>
-		<script src="TrackballControls.js"></script>
-		<script src="CSS3DRenderer.js"></script>
+		<script src="js/three.min.js"></script>
+		<script src="js/tween.min.js"></script>
+		<script src="js/TrackballControls.js"></script>
+		<script src="js/CSS3DRenderer.js"></script>
 
 		<div id="container"></div>
 		<script>
@@ -135,7 +135,7 @@
 			}
 
 			init();
-			
+
 			animate();
 
 			function init() {
@@ -154,7 +154,7 @@
 					object.position.x = ( ( i % 3 ) * 400 ) - 0;
 					console.log(object.position.x);
 					object.position.y = 0; //( - ( Math.floor( i / 5 ) % 5 ) * 400 ) + 800;
-					object.position.z = ( Math.floor( (i) / 1 ) ) * 1000 - 2000; //objects.length - 
+					object.position.z = ( Math.floor( (i) / 1 ) ) * 1000 - 2000; //objects.length -
 
 					grid.push( object );
 				}
