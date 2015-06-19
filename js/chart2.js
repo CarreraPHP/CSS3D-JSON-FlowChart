@@ -9,7 +9,13 @@ var chart = [{
     }]
 }, {
     id: 'ch0001-ch0002',
-    name: 'Use APM Introscope to monitor the execution time for queries, heap size, etc',
+    name: [
+        'Use APM Introscope<a href="google.com"> to monitor the execution time</a> for queries, heap size, etc',
+        'Use APM Introscope to monitor the execution time for queries, heap size, etc',
+        'Use APM Introscope to monitor the execution time for queries, heap size, etc',
+        'Use APM Introscope to monitor the execution time for queries, heap size, etc',
+        'Use APM Introscope to monitor the execution time for queries, heap size, etc'
+    ].join(' '),
     description: '',
     options: [{
         name: 'Check',
@@ -18,6 +24,9 @@ var chart = [{
     }, {
         name: 'Always',
         charts: 'ch0001-ch0002-ch0004'
+    }, {
+        name: 'rare',
+        charts: 'ch0001-ch0002-ch0007'
     }]
 }, {
     id: 'ch0001-ch0002-ch0003',
@@ -27,6 +36,10 @@ var chart = [{
         name: 'Always',
         impact: -1,
         charts: 'ch0001-ch0002-ch0003-ch0005'
+    }, {
+        name: 'Finish',
+        impact: -1,
+        charts: 'ch0001-ch0002-ch0003-ch0008'
     }]
 }, {
     id: 'ch0001-ch0002-ch0004',
@@ -51,6 +64,22 @@ var chart = [{
     description: '',
     options: [{
         name: 'Finish',
+        charts: ''
+    }]
+}, {
+    id: 'ch0001-ch0002-ch0007',  
+    name: 'Check dynamic behaviour of the flow chart',
+    description: '',
+    options: [{
+        name: 'Working',
+        charts: ''
+    }]
+}, {
+    id: 'ch0001-ch0002-ch0003-ch0008',
+    name: 'Check dynamic behaviour of the flow chart -2',
+    description: '',
+    options: [{
+        name: 'Working',
         charts: ''
     }]
 }];
