@@ -51,7 +51,7 @@
 						grid[d].position.z = grid[d].position.z + _z;
 					}
 
-					transform(grid, 4000 );
+					transform(grid, 250 );
 
 					setTimeout(function(){					
 						var e = (window.innerHeight * sElementNode.clientWidth)/window.innerWidth;
@@ -91,7 +91,7 @@
 				element.className = 'card';
 				element.rawData = content;
 // 				element.style.backgroundColor = 'rgba(0,127,127,' + ( Math.random() * 0.2 + 0.25 ) + ')';
-				element.style.backgroundColor = 'rgba(250,250,250,' + ( Math.random() * 0.08 ) + ')';
+// 				element.style.backgroundColor = 'rgba(131,113,106,0.9)'; // + ( Math.random() * 0.5 + 0.25 ) + ')';
 
 				var symbol = document.createElement( 'div' );
 				symbol.className = 'content';
@@ -144,13 +144,13 @@
 			function init() {
 
 				window.camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 30000 );
-				camera.position.z = 3000;
+				camera.position.z = 6000;
 
-				scene = new THREE.Scene();
+				window._3Scene = scene = new THREE.Scene();
 
 				parserChartList(chart, 0);
 
-				var nObjects = [], max_cnt = 0;
+				var nObjects = [], max_cnt = 0, max_cnt_index = 0, max_height = 0;
 
 				for(var y in objects){
 					var x = objects[y], x_id = x.element.id, v = x_id.split('-'), u = v.length - 1;
@@ -163,11 +163,17 @@
 				}
 
 				for(var w in nObjects){
-					max_cnt = (nObjects[w].length > max_cnt) ? nObjects[w].length : max_cnt;
+					var wObjectArr = nObjects[w];
+					max_cnt = (wObjectArr.length > max_cnt) ? wObjectArr.length : max_cnt;
+
+					for(var q in wObjectArr){
+						console.log("%c height", "color:red;font-size:22px;", max_height, wObjectArr[q].element, wObjectArr[q].element.clientHeight);
+						max_height = (wObjectArr[q].element.clientHeight > max_height) ? wObjectArr[q].element.clientHeight : max_height;
+					}
 				}
 
 				max_y = (max_cnt * 400) / 2;
-				console.log(max_cnt, max_y);
+				console.log("%c height", "color:red;font-size:22px;", max_cnt, max_y, max_height, nObjects[1]);
 
 				var cnObjects = [], cardStart = true, _x = 0, _y = 0, _z = 0, nObjIndex = 0;
 
@@ -183,7 +189,70 @@
 						}
 					}
 				}
+				
+				// Approach 2: starting from last child and span out to the parent.
 
+				while(cnObjects.length !== 0){
+					var cur = cnObjects.shift();						
+					
+					for(var curIndex in cur){
+						var curMock = new THREE.Object3D();
+
+						cur[curIndex].mockObject = curMock;
+
+						if(cur.length == 1 && cardStart){
+							_x = 0; _y = 0; _z = 0;
+							curMock.position.x = 0; //-650;
+							curMock.position.y = 0;
+							curMock.position.z = 0;
+							cardStart = false;
+						}else{
+							var parentObj = false, 
+								parentObjArr = nObjects[nObjIndex-1],
+								elem = cur[curIndex].element,
+								elemId = elem.id,
+								elemIdArr = elemId.split('-');
+
+							elemIdArr.pop();
+							var parenElemId = elemIdArr.join('-')
+							for (var _nox in parentObjArr){
+								if(parentObjArr[_nox].element.id == parenElemId){
+									parentObj = parentObjArr[_nox];
+// 									console.log("'see if its fine ... ", nObjects, nObjIndex, parentObj, parentObjArr, parenElemId, elemId, '||', _nox, parentObjArr[_nox].element.id);
+// 									console.log("'see if its fine ... ", parentObj, parentObjArr, parenElemId, '||', parentObjArr[_nox].element.id);
+								}
+							}
+							
+							var _y_diff = 500 * (max_cnt/2), _y_incr = 0;
+							if(cur.length > 1){
+								var _y_init = 0;
+								if(cur.length % 2 == 0){
+									_y_init = 1;
+								}else{
+									_y_init = 0;
+								}
+								_y_incr = (curIndex - Math.floor(cur.length/2));
+								if(_y_incr > -1){
+									_y_incr = _y_incr + _y_init;
+								}
+// 								console.log("curIndex , ", curIndex, (cur.length/2 + 1), (curIndex - (cur.length/2 + 1)), (curIndex - Math.floor(cur.length/2)), _y_incr);
+							}
+
+// 							cur[curIndex].position.x = parentObj.position.x + 650;
+// 							cur[curIndex].position.y = parentObj.position.y + (_y_incr * _y_diff);
+// 							cur[curIndex].position.z = parentObj.position.z;
+							curMock.position.x = parentObj.mockObject.position.x + 650;
+							curMock.position.y = parentObj.mockObject.position.y + (_y_incr * _y_diff);
+							curMock.position.z = parentObj.mockObject.position.z;
+// 							console.log("child - parent position , ", cur[curIndex].position, curMock.position, parentObj.position);
+						}
+						grid.push(curMock);
+					}
+					nObjIndex++;
+				}
+
+				transform(grid, 250 );
+/*
 				while(cnObjects.length !== 0){
 					var cur = cnObjects.shift();
 
@@ -236,7 +305,7 @@
 
 					nObjIndex++;
 				}
-
+*/
 				renderer = new THREE.CSS3DRenderer();
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.domElement.style.position = 'absolute';
