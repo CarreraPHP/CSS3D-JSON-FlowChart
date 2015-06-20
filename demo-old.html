@@ -6,7 +6,7 @@
 		<title>Flow Chart</title>
 		<link rel="stylesheet" href="css/demo.css" />
 		<style>
-
+			
 		</style>
 	</head>
 	<body>
@@ -14,6 +14,7 @@
 		<script src="js/tween.min.js"></script>
 		<script src="js/TrackballControls.js"></script>
 		<script src="js/CSS3DRenderer.js"></script>
+		<script src="js/chart2.js"></script>
 
 		<div id="container"></div>
 		<script>
@@ -25,92 +26,94 @@
 
 			var i=1, xArr = [0];
 			for(; i <= 50; i++){xArr.push(i);xArr.push(-i);}
-			var chart = [{
-				name: 'User is getting slow response',
-				description: '',
-				options: [{
-					name: 'Always',
-					impact: -1,
-					charts: [{
-						name: 'Use APM Introscope to monitor the execution time for queries, heap size, etc',
-						description: '',
-						options: [{
-							name: 'Check',
-							impact: -1,
-							charts: [{
-								name: 'Check whether the utilization of the server is high',
-								description: '',
-								options: [{
-									name: 'Always',
-									impact: -1,
-									charts: [{
-										name: 'Check whether the Query is taking more time',
-										description: '',
-										options: [{
-											name: 'Always',
-											impact: -1,
-											charts: [{
-												name: 'Try with different login id\'s and see if for all users getting slow response',
-												description: '',
-												options: [{
-													name: 'Finish',
-													charts: []
-												}]
-											}]
-										}]
-									}]
-								}]
-							}]
-						}, {
-							name: 'Always',
-							charts: [{
-								name: 'Nothing Here',
-								description: '',
-								options: [{
-									name: 'finish',
-									charts: []
-								}]
-							}]
-						}]
-					}]
-				}]
-			}];
 
+			function handleOptionClick(optionNode){
+				camera.position.z = 3000;
+
+				var optData = optionNode.rawData;
+				
+				if(optData.charts != ''){
+					var	chartData = optionNode.parentNode.parentNode.parentNode.rawData,
+						chart3DObject = optionNode.parentNode.parentNode.parentNode.rawObject,
+						elementNode = chart3DObject.element || {},
+						sElementNode = document.querySelector('#' + optData.charts),
+						schart3DObject = sElementNode.rawObject,
+						_x = chart3DObject.position.x - schart3DObject.position.x,
+						_y = chart3DObject.position.y - schart3DObject.position.y,
+						_z = chart3DObject.position.z - schart3DObject.position.z;
+
+					console.log("raw Data ", _x, _y, _z, sElementNode, elementNode, chart3DObject, chartData, optData);
+	// 				debugger;
+
+					for(var d in grid){
+						grid[d].position.x = grid[d].position.x + _x;
+						grid[d].position.y = grid[d].position.y + _y;
+						grid[d].position.z = grid[d].position.z + _z;
+					}
+
+					transform(grid, 4000 );
+
+					setTimeout(function(){					
+						var e = (window.innerHeight * sElementNode.clientWidth)/window.innerWidth;
+						e = (e > sElementNode.clientHeight) ? e : sElementNode.clientHeight;
+						camera.position.z = (e * 0.5 / Math.tan(40 * 0.5 * (Math.PI/180))) + 50;
+					}, 500);
+				}
+			}
+			
 			function createOptHolder(){
 				var details = document.createElement( 'div' );
-				details.className = 'details';
+				details.className = 'options';
 				return details;
 			}
 
-			function createOptSiblings(optHolder, content){
-				var options = document.createElement('div');
-				options.innerHTML = content;
+			function createOptRow(){
+				var detailRow = document.createElement('div');
+				return detailRow;
+			}
+
+			function createOptSiblings(optHolder, opt){
+				var options = document.createElement('div'),
+					span = document.createElement('span');
+				span.innerHTML = opt.name;
+				options.appendChild(span);
+				options.rawData = opt;
+				options.addEventListener('click', function(){
+					console.log("Event fired....");
+					handleOptionClick(this);
+				});
 				optHolder.appendChild(options);
 			}
 
 			function createCard(content){
 				var element = document.createElement( 'div' );
-				element.className = 'element';
+				element.id = content.id;
+				element.className = 'card';
+				element.rawData = content;
 // 				element.style.backgroundColor = 'rgba(0,127,127,' + ( Math.random() * 0.2 + 0.25 ) + ')';
-				element.style.backgroundColor = 'rgba(250,250,250,' + ( Math.random() * 0.08 ) + ')';
+				element.style.backgroundColor = 'rgba(131,113,106,0.9)'; // + ( Math.random() * 0.5 + 0.25 ) + ')';
 
 				var symbol = document.createElement( 'div' );
-				symbol.className = 'symbol';
-				symbol.textContent = content;
+				symbol.className = 'content';
+				symbol.innerHTML = content.name;
 				element.appendChild( symbol );
 
 				return element;
 			}
 
 			function parseChartOptions(opts){
-				var optHolder = createOptHolder();
+				var optHolder = createOptHolder(),
+					optRowArr = [];
 				for(var z in opts){
-					console.log("options : ", z, opts[z]);
 					var opt = opts[z];
-					if(opt.charts.length > 0){
-						parserChartList(opt.charts);
+
+					if(optRowArr.length == 0){
+						optRowArr.push(createOptRow());
 					}
-					createOptSiblings(optHolder, opt.name);
+					createOptSiblings(optRowArr[0], opt);
+// 					if((z%2 !== 0) || (z == opts.length-1)){
+						optHolder.appendChild(optRowArr.shift());
+// 					}
 				}
 				return optHolder;
 			}
@@ -118,8 +121,8 @@
 			function parserChartList(lists, z_index){
 				for(var z in lists){
 					var lt = lists[z];
-					var ltCard = createCard(lt.name);
-					console.log("chart : ", z, lt, lt.options);
+					var ltCard = createCard(lt);
+// 					console.log("chart : ", z, lt, lt.options);
 					if(lt.options.length > 0){
 						ltCard.appendChild(parseChartOptions(lt.options));
 					}
@@ -129,34 +132,116 @@
 					object.position.y = 0; //Math.random() * 4000 - 2000;
 					object.position.z = z_index || 0; //Math.random() * 4000 - 2000;
 					scene.add( object );
-
+					ltCard.rawObject = object;
 					objects.push( object );
 				}
 			}
 
 			init();
-
+			
 			animate();
 
 			function init() {
 
-				window.camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.z = 3000;
+				window.camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 30000 );
+				camera.position.z = 6000;
 
-				scene = new THREE.Scene();
+				window.scene = new THREE.Scene();
 
 				parserChartList(chart, 0);
 
-				// grid
-				for ( var i = objects.length-1; i >= 0; i-- ) {
-					var object = new THREE.Object3D();
+				var nObjects = [], max_cnt = 0;
 
-					object.position.x = ( ( i % 3 ) * 400 ) - 0;
-					console.log(object.position.x);
-					object.position.y = 0; //( - ( Math.floor( i / 5 ) % 5 ) * 400 ) + 800;
-					object.position.z = ( Math.floor( (i) / 1 ) ) * 1000 - 2000; //objects.length -
+				for(var y in objects){
+					var x = objects[y], x_id = x.element.id, v = x_id.split('-'), u = v.length - 1;
 
-					grid.push( object );
+					if(u in nObjects){
+						nObjects[u].push(x);
+					} else {
+						nObjects[u] = [x];
+					}
+				}
+
+				for(var w in nObjects){
+					max_cnt = (nObjects[w].length > max_cnt) ? nObjects[w].length : max_cnt;
+				}
+
+				max_y = (max_cnt * 400) / 2;
+				console.log(max_cnt, max_y);
+
+				var cnObjects = [], cardStart = true, _x = 0, _y = 0, _z = 0, nObjIndex = 0;
+
+				//reset object for handling the shuffled arrangements of grid array.
+				objects = [];
+
+				for(var _ci in nObjects){
+					cnObjects[_ci] = [];
+					if(nObjects[_ci].length > 0){
+						for(var _cj in nObjects[_ci]){
+							cnObjects[_ci][_cj] = nObjects[_ci][_cj];
+							objects.push(nObjects[_ci][_cj]);
+						}	
+					}
+				}
+
+				while(cnObjects.length !== 0){
+					var cur = cnObjects.shift();						
+					
+					for(var curIndex in cur){
+						var curMock = new THREE.Object3D();
+
+						cur[curIndex].mockObject = curMock;
+
+						if(cur.length == 1 && cardStart){
+							_x = 0; _y = 0; _z = 0;
+							curMock.position.x = 0; //-650;
+							curMock.position.y = 0;
+							curMock.position.z = 0;
+							cardStart = false;
+						}else{
+							var parentObj = false, 
+								parentObjArr = nObjects[nObjIndex-1],
+								elem = cur[curIndex].element,
+								elemId = elem.id,
+								elemIdArr = elemId.split('-');
+
+							elemIdArr.pop();
+							var parenElemId = elemIdArr.join('-')
+							for (var _nox in parentObjArr){
+								if(parentObjArr[_nox].element.id == parenElemId){
+									parentObj = parentObjArr[_nox];
+// 									console.log("'see if its fine ... ", nObjects, nObjIndex, parentObj, parentObjArr, parenElemId, elemId, '||', _nox, parentObjArr[_nox].element.id);
+// 									console.log("'see if its fine ... ", parentObj, parentObjArr, parenElemId, '||', parentObjArr[_nox].element.id);
+								}
+							}
+							
+							var _y_diff = 500 * (max_cnt/2), _y_incr = 0;
+							if(cur.length > 1){
+								var _y_init = 0;
+								if(cur.length % 2 == 0){
+									_y_init = 1;
+								}else{
+									_y_init = 0;
+								}
+								_y_incr = (curIndex - Math.floor(cur.length/2));
+								if(_y_incr > -1){
+									_y_incr = _y_incr + _y_init;
+								}
+// 								console.log("curIndex , ", curIndex, (cur.length/2 + 1), (curIndex - (cur.length/2 + 1)), (curIndex - Math.floor(cur.length/2)), _y_incr);
+							}
+
+// 							cur[curIndex].position.x = parentObj.position.x + 650;
+// 							cur[curIndex].position.y = parentObj.position.y + (_y_incr * _y_diff);
+// 							cur[curIndex].position.z = parentObj.position.z;
+							curMock.position.x = parentObj.mockObject.position.x + 650;
+							curMock.position.y = parentObj.mockObject.position.y + (_y_incr * _y_diff);
+							curMock.position.z = parentObj.mockObject.position.z;
+							console.log("child - parent position , ", cur[curIndex].position, curMock.position, parentObj.position);
+						}
+						grid.push(curMock);
+					}
+
+					nObjIndex++;
 				}
 
 				renderer = new THREE.CSS3DRenderer();
