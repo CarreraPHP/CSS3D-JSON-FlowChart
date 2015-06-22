@@ -45,6 +45,67 @@
 				text-align: center;
 			}
 
+			.arrow, .arrow-reverse {
+				cursor: default;
+				position: absolute;
+				display:table;
+				line-height: 11px;
+				font-size: 9px;
+				background-color: rgba(255, 255, 255, 0.2);
+				color: #222;
+			
+				overflow: hidden;
+			}
+
+			.arrow > div:nth-child(1){
+				position:absolute;
+				border-bottom: 3px solid #000;
+				border-right: 3px solid #000;
+				bottom: 0px;
+				left: 0px;
+				width: 70%;
+				height: 60%;
+				border-bottom-right-radius: 6px;
+			}
+
+			.arrow > div:nth-child(2){
+				position:absolute;
+				border-top: 3px solid #000;
+				border-left: 3px solid #000;
+				top:0;
+				/* bottom: 0px; */
+				right: -3px;
+				width: 30%;
+				height: 60%;
+				border-top-left-radius: 6px;
+			}
+
+			.arrow-reverse{
+				display:table;
+			}
+
+			.arrow-reverse > div:nth-child(1){
+				position:absolute;
+				border-top: 3px solid #000;
+				border-right: 3px solid #000;
+				top: 0px;
+				left: 0px;
+				width: 30%;
+				height: 50%;
+				border-top-right-radius: 6px;
+			}
+
+			.arrow-reverse > div:nth-child(2){
+				position:absolute;
+				border-bottom: 3px solid #000;
+				border-left: 3px solid #000;
+				bottom: 0;
+				right: -3px;
+				width: 70%;
+				height: 60%;
+				border-bottom-left-radius: 6px;
+			}
+
 			.card {
 				width: 180px;
 /* 				height: 400px; */
