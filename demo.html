@@ -26,6 +26,16 @@
 
 			var i=1, xArr = [0];
 			for(; i <= 50; i++){xArr.push(i);xArr.push(-i);}
+
+			function getHeight(elem){
+				var elemClientRect = elem.getBoundingClientRect();
+				return elemClientRect.height;
+			}
+
+			function getWidth(elem){
+				var elemClientRect = elem.getBoundingClientRect();
+				return elemClientRect.width;
+			}
 			
 			function handleOptionClick(optionNode){
 // 				camera.position.z = 1000;
@@ -55,8 +65,8 @@
 					transform(grid, 250 );
 
 // 					setTimeout(function(){					
-// 						var e = (window.innerHeight * sElementNode.clientWidth)/window.innerWidth;
-// 						e = (e > sElementNode.clientHeight) ? e : sElementNode.clientHeight;
+// 						var e = (window.innerHeight * getHeight(sElementNode)/window.innerWidth;
+// 						e = (e > getHeight(sElementNode)) ? e : getHeight(sElementNode);
 // 						camera.position.z = (e * 0.5 / Math.tan(40 * 0.5 * (Math.PI/180))) + 50;
 // 					}, 500);
 				}
@@ -264,10 +274,10 @@
 							
 // 							debugger;
 							var curFrameNode = iElem.contentDocument.querySelector('#' + cur[curIndex].element.id);
-// 							console.log(iElem, cur[curIndex].element, curFrameNode, curFrameNode.clientHeight, cur[curIndex].element.clientHeight);
-// 							console.log(curFrameNode.clientHeight, cur[curIndex].element.clientHeight);
+// 							console.log(iElem, cur[curIndex].element, curFrameNode, getHeight(curFrameNode), getHeight(cur[curIndex].element));
+// 							console.log(getHeight(curFrameNode), getHeight(cur[curIndex].element));
 							
-							var _y_diff = curFrameNode.clientHeight * (max_cnt/2), _y_incr = 0; // 180
+							var _y_diff = getHeight(curFrameNode) * (max_cnt/2), _y_incr = 0; // 180
 							if(cur.length > 1){
 								var _y_init = 0;
 								if(cur.length % 2 == 0){
@@ -309,32 +319,93 @@
 
 				setTimeout(function(){
 					drawArrow();
-				}, 500);
+				}, 750);
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
 			}
 
 			function drawArrow(){
+				function getTopAdjustment(jinObj, options,_u){
+					var contentHeight = getHeight(jinObj.element.querySelector('.content'));
+
+					var returnVal = contentHeight + (getHeight(options[_u]) / 2);
+					while(_u > 0){
+						returnVal += getHeight(options[_u-1]);
+						_u--;
+					}
+					return returnVal;
+				}
+
+				function createArrow(id, arrowBottomLeftX, arrowBottomLeftY, arrowElemHeight, arrowElemWidth){
+					var arrowElm = document.createElement('div');
+					arrowElm.className = '' + ((arrowElemHeight < 0) ? " arrow-reverse" : " arrow");
+					arrowElm.id = id + '-arrow';
+					arrowElm.style.height = ((arrowElemHeight < 0) ? -arrowElemHeight : arrowElemHeight) + 'px';
+					arrowElm.style.width = ((arrowElemWidth < 0) ? -arrowElemWidth : arrowElemWidth) + 'px';
+					arrowElm.innerHTML = "<div></div><div></div>";
+
+					var object = new THREE.CSS3DObject( arrowElm );
+					object.position.y = (arrowElemHeight < 0) ? arrowBottomLeftY + arrowElemHeight : arrowBottomLeftY; // - (arrowElemWidth / 2) + 20
+					object.position.x =  arrowBottomLeftX; // + (arrowBottomLeftX / 2);
+					object.position.z = 5;
+
+					var mockObject = new THREE.Object3D();
+					mockObject.position.y = (arrowElemHeight < 0) ? arrowBottomLeftY + arrowElemHeight : arrowBottomLeftY; //  - (arrowElemWidth / 2) + 20
+					mockObject.position.x = arrowBottomLeftX; // + (arrowBottomLeftX / 2);
+					mockObject.position.z = 5;
+
+					_3Scene.add(object);
+					object.mockObject = mockObject;
+					object.element.rawObject = object;
+					object.element.rawData = {};
+					objects.push(object);
+					grid.push(mockObject);
+				}
+
 				for(var _i in nObjects){
 					var inObj = nObjects[_i];
 					for(var _j in inObj){
 						var jinObj = inObj[_j];
 
-						console.log("draw arrow", jinObj, jinObj.element.querySelectorAll('.options > div > div'));
+// 						console.log("draw arrow", jinObj, jinObj.element.querySelectorAll('.options > div > div'));
 
 						var options = jinObj.element.querySelectorAll('.options > div > div');
 
-						for(var _k in options){
+						for(var _k=0; _k < options.length; _k++){
 							var kOption = options[_k];
-							var linkedChart = document.querySelector('#' + kOption.rawData.charts);
-							var linkedChartObject = linkedChart.rawObject;
 
-							
+// 							console.log("raw Data ", options, _k, kOption.rawData);
 
+							if(kOption.rawData.charts !== ''){
+								var linkedChart = document.querySelector('#' + kOption.rawData.charts);
+								var linkedChartObject = linkedChart.rawObject;
+								var topPadding = getTopAdjustment(jinObj, options, _k);
+
+								var lcoPosY = (linkedChartObject.position.y > -1 && linkedChartObject.position.y < 1) ? linkedChartObject.mockObject.position.y : linkedChartObject.position.y;
+								var lcoPosX = (linkedChartObject.position.x > -1 && linkedChartObject.position.x < 1) ? linkedChartObject.mockObject.position.x : linkedChartObject.position.x;
+								var joPosY = (jinObj.position.y > -1 && jinObj.position.y < 1) ? jinObj.mockObject.position.y : jinObj.position.y;
+								var joPosX = (jinObj.position.x > -1 && jinObj.position.x < 1) ? jinObj.mockObject.position.x : jinObj.position.x;
+
+								var arrowBottomLeftY = joPosY + (getHeight(jinObj.element) - topPadding) - (getHeight(jinObj.element) / 2);
+								var arrowTopRightY = lcoPosY + (getHeight(linkedChart) / 2) - (getHeight(linkedChart) / 2);
+								var arrowElemHeight = arrowTopRightY - arrowBottomLeftY;
+
+								var arrowBottomLeftX = joPosX;// + (getWidth(jinObj.element) / 2);
+								var arrowTopRightX = lcoPosX - (getWidth(linkedChartObject.element) /2);
+								var arrowElemWidth = 20; //arrowTopRightX - arrowBottomLeftX;
+
+								console.log("[getHeight(jinObj.element), topPadding, jinObj.position.x, jinObj.position.y, linkedChartObject.position.x, linkedChartObject.position.y, jinObj.id, getHeight(linkedChart), linkedChartObject.id]");
+								console.log(getHeight(jinObj.element), topPadding, joPosX, joPosY, lcoPosX, lcoPosY, jinObj.element.id, getHeight(linkedChart), kOption.rawData.charts);
+								console.log("[arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth]");
+								console.log(arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth);
+								createArrow(kOption.rawData.charts, arrowBottomLeftX, arrowBottomLeftY, arrowElemHeight, arrowElemWidth);
+							}
 						}
 					}
 				}
+
+				render();
 			}
 
 			function transform( targets, duration ) {
