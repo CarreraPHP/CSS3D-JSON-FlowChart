@@ -23,11 +23,11 @@ THREE.TrackballControls = function ( object, domElement ) {
 	this.zoomSpeed = 1.2;
 	this.panSpeed = 0.3;
 
-	this.noRotate = false;
+	this.noRotate = true; // default was false
 	this.noZoom = false;
 	this.noPan = false;
 
-	this.staticMoving = false;
+	this.staticMoving = true;
 	this.dynamicDampingFactor = 0.2;
 
 	this.minDistance = 0;
@@ -388,12 +388,27 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	}
 
+	var MousePOS = {
+		startX: 0,
+		startY: 0,
+		endX: 0,
+		endY: 0,
+		moveX: 0,
+		moveY: 0,
+		dispatchTimer: false
+	};
+
 	function mousedown( event ) {
 
 		if ( _this.enabled === false ) return;
 
 		event.preventDefault();
 		event.stopPropagation();
+
+// 		console.log("mouse down", event, _state);
+		MousePOS.startX = event.pageX;
+		MousePOS.startY = event.pageY;
+		document.body.style.cursor = "move";
 
 		if ( _state === STATE.NONE ) {
 
@@ -432,6 +447,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 		event.preventDefault();
 		event.stopPropagation();
 
+// 		console.log("mouse move :-- ", event, _state, getMouseOnScreen( event.pageX, event.pageY ), getMouseOnCircle( event.pageX, event.pageY ));
+
 		if ( _state === STATE.ROTATE && !_this.noRotate ) {
 
 			_movePrev.copy(_moveCurr);
@@ -445,6 +462,22 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 			_panEnd.copy( getMouseOnScreen( event.pageX, event.pageY ) );
 
+		}else if(_state === STATE.ROTATE && _this.noRotate){
+// 			console.log("mouse move", event, event.pageY, MousePOS.startY);
+			
+			MousePOS.endX = event.pageX;
+			MousePOS.moveX = event.pageX - MousePOS.startX;
+			MousePOS.endY = event.pageY;
+			MousePOS.moveY = MousePOS.startY - event.pageY;
+
+			if(MousePOS.dispatchTimer !== false){
+				clearTimeout(MousePOS.dispatchTimer);
+			}
+			MousePOS.dispatchTimer = setTimeout(function(){
+				var customEvent = new Event('MoveObject');
+				customEvent.pos = MousePOS;
+				document.dispatchEvent(customEvent);
+			}, 250);
 		}
 
 	}
@@ -455,6 +488,12 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		event.preventDefault();
 		event.stopPropagation();
+
+// 		console.log("mouse up", event, _state);
+// 		MousePOS.startX = 0;
+// 		MousePOS.startY = 0;
+
+		document.body.style.cursor = "default";
 
 		_state = STATE.NONE;
 
