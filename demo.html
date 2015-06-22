@@ -28,13 +28,14 @@
 			for(; i <= 50; i++){xArr.push(i);xArr.push(-i);}
 			
 			function handleOptionClick(optionNode){
-				camera.position.z = 3000;
+// 				camera.position.z = 1000;
 
 				var optData = optionNode.rawData;
 				
 				if(optData.charts != ''){
-					var	chartData = optionNode.parentNode.parentNode.parentNode.rawData,
-						chart3DObject = optionNode.parentNode.parentNode.parentNode.rawObject,
+					var	chartNode = optionNode.parentNode.parentNode.parentNode,
+						chartData = chartNode.rawData,
+						chart3DObject = chartNode.rawObject,
 						elementNode = chart3DObject.element || {},
 						sElementNode = document.querySelector('#' + optData.charts),
 						schart3DObject = sElementNode.rawObject,
@@ -42,22 +43,22 @@
 						_y = chart3DObject.position.y - schart3DObject.position.y,
 						_z = chart3DObject.position.z - schart3DObject.position.z;
 
-					console.log("raw Data ", _x, _y, _z, sElementNode, elementNode, chart3DObject, chartData, optData);
-	// 				debugger;
-
-					for(var d in grid){
-						grid[d].position.x = grid[d].position.x + _x;
-						grid[d].position.y = grid[d].position.y + _y;
-						grid[d].position.z = grid[d].position.z + _z;
-					}
-
+// 					console.log("raw Data ", _x, _y, _z, chartNode.rawObject.position.x);
+					
+// 					if(chartNode.rawObject.position.x === 0){
+						for(var d in grid){
+							grid[d].position.x = grid[d].position.x + _x;
+							grid[d].position.y = grid[d].position.y + _y;
+							grid[d].position.z = grid[d].position.z + _z;
+						}	
+// 					}
 					transform(grid, 250 );
 
-					setTimeout(function(){					
-						var e = (window.innerHeight * sElementNode.clientWidth)/window.innerWidth;
-						e = (e > sElementNode.clientHeight) ? e : sElementNode.clientHeight;
-						camera.position.z = (e * 0.5 / Math.tan(40 * 0.5 * (Math.PI/180))) + 50;
-					}, 500);
+// 					setTimeout(function(){					
+// 						var e = (window.innerHeight * sElementNode.clientWidth)/window.innerWidth;
+// 						e = (e > sElementNode.clientHeight) ? e : sElementNode.clientHeight;
+// 						camera.position.z = (e * 0.5 / Math.tan(40 * 0.5 * (Math.PI/180))) + 50;
+// 					}, 500);
 				}
 			}
 			
@@ -119,6 +120,7 @@
 			}
 
 			function parserChartList(lists, z_index){
+				window.baseObject = new THREE.CSS3DObject( document.createElement('div') );
 				for(var z in lists){
 					var lt = lists[z];
 					var ltCard = createCard(lt);
@@ -131,27 +133,66 @@
 					object.position.x = 0; //Math.random() * 4000 - 2000;
 					object.position.y = 0; //Math.random() * 4000 - 2000;
 					object.position.z = z_index || 0; //Math.random() * 4000 - 2000;
-					scene.add( object );
+					
 					ltCard.rawObject = object;
 					objects.push( object );
+					baseObject.add(object);
+
+					var ltCardClone = ltCard.cloneNode();
+					ltCardClone.innerHTML = ltCard.innerHTML;
+					iElem.contentDocument.body.appendChild(ltCardClone);
 				}
+				
+
+				scene.add( baseObject );
 			}
 
-			init();
+			function createHiddenFrame(){
+				window.iElem = document.createElement('iframe');
+				document.body.appendChild(iElem);
+				window.linkElem = document.createElement('link');
+				linkElem.href = "css/demo.css";
+				linkElem.rel = "stylesheet";
+// 				iElem.contentDocument.addEventListener('DOMContentLoaded ', domLoad);
+				iElem.contentDocument.body.appendChild(linkElem);
+				iElem.style.visibility = "hidden";
+				iElem.contentDocument.body.style.position = "relative";
+				iElem.width = "600px";
+				iElem.height = "600px";
 
-			animate();
+			}
+
+			beforeInit();
+			createHiddenFrame();
+			parserChartList(chart, 0);
+			setTimeout(domLoad, 250);
+
+			function domLoad(){
+				document.addEventListener('MoveObject', function(event){
+					console.log("Move Object custom method...", event.pos.moveY, event.pos.startY, event.pos.endY);
+
+					for(_n in grid){
+						grid[_n].position.x += event.pos.moveX;
+						grid[_n].position.y += event.pos.moveY;
+					}
+					transform(grid, 125);
+				});
+
+// 				console.log("content loaded......");
+				init();
+				animate();	
+			}
+
+			function beforeInit(){
+				window.camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 30000 );
+// 				window.camera = new THREE.OrthographicCamera(window.innerWidth / 2, window.innerWidth / -2, window.innerHeight / 2, window.innerHeight / -2, -500, 5000);
+				window._3Scene = scene = new THREE.Scene();
+				camera.position.z = 800;
+			}
+
+			var nObjects = [], max_cnt = 0, max_cnt_index = 0, max_height = 0;
 
 			function init() {
-
-				window.camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 30000 );
-				camera.position.z = 6000;
-
-				window._3Scene = scene = new THREE.Scene();
-
-				parserChartList(chart, 0);
-
-				var nObjects = [], max_cnt = 0, max_cnt_index = 0, max_height = 0;
-
 				for(var y in objects){
 					var x = objects[y], x_id = x.element.id, v = x_id.split('-'), u = v.length - 1;
 
@@ -164,16 +205,14 @@
 
 				for(var w in nObjects){
 					var wObjectArr = nObjects[w];
+					// should be calculated before calculating the 
+					max_cnt_index = (wObjectArr.length > max_cnt) ? w : max_cnt_index;
 					max_cnt = (wObjectArr.length > max_cnt) ? wObjectArr.length : max_cnt;
-
-					for(var q in wObjectArr){
-						console.log("%c height", "color:red;font-size:22px;", max_height, wObjectArr[q].element, wObjectArr[q].element.clientHeight);
-						max_height = (wObjectArr[q].element.clientHeight > max_height) ? wObjectArr[q].element.clientHeight : max_height;
-					}
+// 					console.log("(wObjectArr.length > max_cnt)", (wObjectArr.length > max_cnt), w, max_cnt, max_cnt_index);
 				}
 
-				max_y = (max_cnt * 400) / 2;
-				console.log("%c height", "color:red;font-size:22px;", max_cnt, max_y, max_height, nObjects[1]);
+				max_y = (max_cnt * 180) / 2;
+				console.log("%c  [max_cnt_index, max_cnt, max_y, max_height]", "color:red;font-size:18px;", max_cnt_index, max_cnt, max_y, max_height);
 
 				var cnObjects = [], cardStart = true, _x = 0, _y = 0, _z = 0, nObjIndex = 0;
 
@@ -223,7 +262,12 @@
 								}
 							}
 							
-							var _y_diff = 500 * (max_cnt/2), _y_incr = 0;
+// 							debugger;
+							var curFrameNode = iElem.contentDocument.querySelector('#' + cur[curIndex].element.id);
+// 							console.log(iElem, cur[curIndex].element, curFrameNode, curFrameNode.clientHeight, cur[curIndex].element.clientHeight);
+// 							console.log(curFrameNode.clientHeight, cur[curIndex].element.clientHeight);
+							
+							var _y_diff = curFrameNode.clientHeight * (max_cnt/2), _y_incr = 0; // 180
 							if(cur.length > 1){
 								var _y_init = 0;
 								if(cur.length % 2 == 0){
@@ -238,10 +282,7 @@
 // 								console.log("curIndex , ", curIndex, (cur.length/2 + 1), (curIndex - (cur.length/2 + 1)), (curIndex - Math.floor(cur.length/2)), _y_incr);
 							}
 
-// 							cur[curIndex].position.x = parentObj.position.x + 650;
-// 							cur[curIndex].position.y = parentObj.position.y + (_y_incr * _y_diff);
-// 							cur[curIndex].position.z = parentObj.position.z;
-							curMock.position.x = parentObj.mockObject.position.x + 650;
+							curMock.position.x = parentObj.mockObject.position.x + 300;
 							curMock.position.y = parentObj.mockObject.position.y + (_y_incr * _y_diff);
 							curMock.position.z = parentObj.mockObject.position.z;
 // 							console.log("child - parent position , ", cur[curIndex].position, curMock.position, parentObj.position);
@@ -252,60 +293,7 @@
 				}
 
 				transform(grid, 250 );
-/*
-				while(cnObjects.length !== 0){
-					var cur = cnObjects.shift();
 
-					for(var curIndex in cur){
-						if(cur.length == 1 && cardStart){
-							_x = 0; _y = 0; _z = 0;
-							cur[curIndex].position.x = 0; //-650;
-							cur[curIndex].position.y = 0;
-							cur[curIndex].position.z = 0;
-							cardStart = false;
-						}else{
-							var parentObj = false,
-								parentObjArr = nObjects[nObjIndex-1],
-								elem = cur[curIndex].element,
-								elemId = elem.id,
-								elemIdArr = elemId.split('-');
-
-							elemIdArr.pop();
-							var parenElemId = elemIdArr.join('-')
-							for (var _nox in parentObjArr){
-								if(parentObjArr[_nox].element.id == parenElemId){
-									parentObj = parentObjArr[_nox];
-// 									console.log("'see if its fine ... ", nObjects, nObjIndex, parentObj, parentObjArr, parenElemId, elemId, '||', _nox, parentObjArr[_nox].element.id);
-// 									console.log("'see if its fine ... ", parentObj, parentObjArr, parenElemId, '||', parentObjArr[_nox].element.id);
-								}
-							}
-
-							var _y_diff = 500 * (max_cnt/2), _y_incr = 0;
-							if(cur.length > 1){
-								var _y_init = 0;
-								if(cur.length % 2 == 0){
-									_y_init = 1;
-								}else{
-									_y_init = 0;
-								}
-								_y_incr = (curIndex - Math.floor(cur.length/2));
-								if(_y_incr > -1){
-									_y_incr = _y_incr + _y_init;
-								}
-								console.log("curIndex , ", curIndex, (cur.length/2 + 1), (curIndex - (cur.length/2 + 1)), (curIndex - Math.floor(cur.length/2)), _y_incr);
-							}
-
-							cur[curIndex].position.x = parentObj.position.x + 650;
-							cur[curIndex].position.y = parentObj.position.y + (_y_incr * _y_diff);
-							cur[curIndex].position.z = parentObj.position.z;
-							console.log("child - parent position , ", cur[curIndex].position, parentObj.position);
-						}
-						grid.push(cur[curIndex]);
-					}
-
-					nObjIndex++;
-				}
-*/
 				renderer = new THREE.CSS3DRenderer();
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.domElement.style.position = 'absolute';
@@ -317,10 +305,36 @@
 				controls.maxDistance = 10000;
 				controls.addEventListener( 'change', render );
 
-				transform(grid, 2000 );
+// 				transform(grid, 250 );
+
+				setTimeout(function(){
+					drawArrow();
+				}, 500);
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
+			}
+
+			function drawArrow(){
+				for(var _i in nObjects){
+					var inObj = nObjects[_i];
+					for(var _j in inObj){
+						var jinObj = inObj[_j];
+
+						console.log("draw arrow", jinObj, jinObj.element.querySelectorAll('.options > div > div'));
+
+						var options = jinObj.element.querySelectorAll('.options > div > div');
+
+						for(var _k in options){
+							var kOption = options[_k];
+							var linkedChart = document.querySelector('#' + kOption.rawData.charts);
+							var linkedChartObject = linkedChart.rawObject;
+
+							
+
+						}
+					}
+				}
 			}
 
 			function transform( targets, duration ) {

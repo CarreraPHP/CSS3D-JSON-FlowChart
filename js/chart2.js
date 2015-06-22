@@ -10,11 +10,11 @@ var chart = [{
 }, {
     id: 'ch0001-ch0002',
     name: [
-        'Use APM Introscope<a href="google.com"> to monitor the execution time</a> for queries, heap size, etc',
-        'Use APM Introscope to monitor the execution time for queries, heap size, etc',
-        'Use APM Introscope to monitor the execution time for queries, heap size, etc',
-        'Use APM Introscope to monitor the execution time for queries, heap size, etc',
-        'Use APM Introscope to monitor the execution time for queries, heap size, etc'
+        'Use Introscope <a href="https://google.com">to monitor the execution time</a> for queries, heap size, etc',
+        'Use Introscope to monitor the execution time for queries, heap size, etc',
+        'Use Introscope to monitor the execution time for queries, heap size, etc',
+        'Use Introscope to monitor the execution time for queries, heap size, etc',
+        'Use Introscope to monitor the execution time for queries, heap size, etc'
     ].join(' '),
     description: '',
     options: [{
