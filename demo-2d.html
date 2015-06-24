@@ -53,13 +53,14 @@
                                 var chartNode = optionNode.parentNode.parentNode.parentNode,
                                     chartData = chartNode.rawData,
                                     sElementNode = document.querySelector('#' + optData.charts),
-                                    _left = chartNode.style.left - sElementNode.style.left,
-                                    _top = chartNode.style.top - sElementNode.style.top;
+                                    _left = parseInt(chartNode.style.left) - parseInt(sElementNode.style.left),
+                                    _top = parseInt(chartNode.style.top) - parseInt(sElementNode.style.top);
 
                                 for (var d in grid) {
-                                    grid[d].style.left += _left;
-                                    grid[d].style.top += _top;
+                                    grid[d].style.left = parseInt(grid[d].style.left) + _left;
+                                    grid[d].style.top  = parseInt(grid[d].style.top) + _top;
                                 }
+                                console.log(grid, _left, _top);
                                 transform(grid, 250);
                             }
                         }
@@ -163,11 +164,12 @@
 
                             function domLoad() {
                                 document.addEventListener('MoveObject', function (event) {
-                                    console.log("Move Object custom method...", event.pos.moveY, event.pos.startY, event.pos.endY);
+                                    //console.log("Move Object custom method...", event.pos.moveY, event.pos.startY, event.pos.endY);
 
                                     for (_n in grid) {
-                                        grid[_n].style.left += event.pos.moveX;
-                                        grid[_n].style.top -= event.pos.moveY;
+                                        // console.log(parseInt(grid[_n].style.left), grid[_n].style.left, parseInt(grid[_n].style.top), grid[_n].style.top);
+                                        grid[_n].style.left = (parseInt(grid[_n].style.left) + event.pos.moveX) + "px";
+                                        grid[_n].style.top  = (parseInt(grid[_n].style.top) - event.pos.moveY) + "px";
                                     }
                                     transform(grid, 125);
                                 });
@@ -204,7 +206,7 @@
                                 }
 
                                 max_top = (max_cnt * 180) / 2;
-                                console.log("%c  [max_cnt_index, max_cnt, max_top, max_height]", "color:red;font-size:18px;", max_cnt_index, max_cnt, max_top, max_height);
+                                // console.log("%c  [max_cnt_index, max_cnt, max_top, max_height]", "color:red;font-size:18px;", max_cnt_index, max_cnt, max_top, max_height);
 
                                 var cnObjects = [], cardStart = true, _left = 0, _top = 0, _z = 0, nObjIndex = 0;
                                 //reset object for handling the shuffled arrangements of grid array.
@@ -306,13 +308,14 @@
                                     return returnVal;
                                 }
 
-                                function createArrow(id, arrowBottomLeftX, arrowBottomLeftY, arrowElemHeight, arrowElemWidth) {
+                                function createArrow(_index, id, arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth) {                                    
+                                    var widthPercent = (((_index > 10) ? (_index % 10) : _index) / 1) * 10; //percentage
                                     var arrowElm = document.createElement('div');
-                                    arrowElm.className = '' + ((arrowElemHeight < 0) ? " arrow-reverse" : " arrow");
+                                    arrowElm.className = '' + ((arrowTopRightY > arrowBottomLeftY) ? " arrow-reverse" : " arrow");
                                     arrowElm.id = id + '-arrow';
                                     arrowElm.style.height = ((arrowElemHeight < 0) ? -arrowElemHeight : arrowElemHeight) + 'px';
                                     arrowElm.style.width = ((arrowElemWidth < 0) ? -arrowElemWidth : arrowElemWidth) + 'px';
-                                    arrowElm.innerHTML = "<div></div><div></div>";
+                                    arrowElm.innerHTML = [ "<div style=\"width:", (100 - widthPercent),  "%\"></div>", "<div style=\"width:", (widthPercent), "%\"></div>" ].join('');
                                     arrowElm.style.top = (arrowElemHeight < 0) ? arrowBottomLeftY + arrowElemHeight : arrowBottomLeftY; // - (arrowElemWidth / 2) + 20
                                     arrowElm.style.left = arrowBottomLeftX; // + (arrowBottomLeftX / 2);
 
@@ -335,7 +338,8 @@
 
                                         for (var _k = 0; _k < options.length; _k++) {
                                             var kOption = options[_k];
-                                            console.log("raw Data ", options, _k, kOption.rawData);
+                                           //console.log("\n\n\n\t\t", _i, _j, _k, "raw Data");
+                                           //console.log(options, _k, kOption.rawData);
 
                                             if (kOption.rawData.charts !== '') {
                                                 var linkedChart = document.querySelector('#' + kOption.rawData.charts);
@@ -350,19 +354,19 @@
                                                 var joPosY = (jinObjStyleTop > -1 && jinObjStyleTop < 1) ? jinObj.mockCard.style.top : jinObjStyleTop;
                                                 var joPosX = (jinObjStyleLeft > -1 && jinObjStyleLeft < 1) ? jinObj.mockCard.style.left : jinObjStyleLeft;
 
-                                                var arrowBottomLeftY = joPosY + (getHeight(jinObj) - topPadding) - (getHeight(jinObj) / 2);
-                                                var arrowTopRightY = lcoPosY + (getHeight(linkedChart) / 2) - (getHeight(linkedChart) / 2);
+                                                var arrowBottomLeftY = topPadding + joPosY;
+                                                var arrowTopRightY = lcoPosY + (getHeight(linkedChart) / 2);
                                                 var arrowElemHeight = arrowTopRightY - arrowBottomLeftY;
 
                                                 var arrowBottomLeftX = joPosX + getWidth(jinObj);
-                                                var arrowTopRightX = lcoPosX - (getWidth(linkedChart) / 2);
-                                                var arrowElemWidth = 20; //arrowTopRightX - arrowBottomLeftX;
+                                                var arrowTopRightX = lcoPosX;
+                                                var arrowElemWidth = arrowTopRightX - arrowBottomLeftX;
 
-                                                console.log("[getHeight(jinObj), topPadding, jinObj.style.left, jinObj.style.top, linkedChart.style.left, lcStyleTop, jinObj.id, getHeight(linkedChart), linkedChartObject.id]");
-                                                console.log(getHeight(jinObj), topPadding, joPosX, joPosY, lcoPosX, lcoPosY, jinObj.id, getHeight(linkedChart), kOption.rawData.charts);
-                                                console.log("[arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth]");
-                                                console.log(arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth);
-                                                createArrow(kOption.rawData.charts, arrowBottomLeftX, arrowBottomLeftY, arrowElemHeight, arrowElemWidth);
+                                                // console.log("[getHeight(jinObj), topPadding, jinObj.style.left, jinObj.style.top, linkedChart.style.left, lcStyleTop, jinObj.id, getHeight(linkedChart), linkedChartObject.id]");
+                                                // console.log(getHeight(jinObj), topPadding, joPosX, joPosY, lcoPosX, lcoPosY, jinObj.id, getHeight(linkedChart), kOption.rawData.charts);
+                                                // console.log("[arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth]");
+                                                // console.log(arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth);
+                                                createArrow(_k+1, kOption.rawData.charts, arrowBottomLeftX, arrowTopRightX, arrowBottomLeftY, arrowTopRightY, arrowElemHeight, arrowElemWidth);
                                             }
                                         }
                                     }
